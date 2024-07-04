@@ -1,59 +1,48 @@
-#!/usr/bin/python3
-"""N Queens"""
-import sys
+var iterations = 0
 
+var print_board = function (columns) {
+  var n = columns.length, row = 0, col = 0
+  while (row < n) {
+    while (col < n) {
+      process.stdout.write(columns[row] === col ? 'Q ' : '# ')
+      col++
+    }
 
-def print_board(board, n):
-    """Print allocated positions to the queen"""
-    b = []
+    process.stdout.write('\n')
+    col = 0
+    row++
+  }
+}
 
-    for i in range(n):
-        for j in range(n):
-            if j == board[i]:
-                b.append([i, j])
-    print(b)
+var has_conflict = function (columns) {
+  var len = columns.length, last = columns[len - 1], previous = len - 2
 
+  while (previous >= 0) {
+    if (columns[previous] === last) return true
+    if (last - (len - 1) === columns[previous] - previous) return true
+    if (last + (len - 1) === columns[previous] + previous) return true
+    previous--
+  }
 
-def is_position_safe(board, i, j, r):
-    """Checks if the position is safe for the queen"""
-    return board[i] in (j, j - i + r, i - r + j)
+  return false
+}
 
+var place_next_queen = function (total, queens, columns) {
+  if (queens === 0) return columns
+  columns = columns || []
 
-def safe_positions(board, row, n):
-    """Find all safe positions where the queen can be allocated"""
-    if row == n:
-        print_board(board, n)
+  for (var column = 0; column < total; column++) {
+    columns.push(column)
+    iterations++
+    if (!has_conflict(columns) &&
+        place_next_queen(total, queens - 1, columns)) {
+      return columns
+    }
+    columns.pop(column)
+  }
 
-    else:
-        for j in range(n):
-            allowed = True
-            for i in range(row):
-                if is_position_safe(board, i, j, row):
-                    allowed = False
-            if allowed:
-                board[row] = j
-                safe_positions(board, row + 1, n)
+  return null
+}
 
-
-def create_board(size):
-    """Generates the board"""
-    return [0 * size for i in range(size)]
-
-
-if len(sys.argv) != 2:
-    print("Usage: nqueens N")
-    exit(1)
-
-try:
-    n = int(sys.argv[1])
-except BaseException:
-    print("N must be a number")
-    exit(1)
-
-if (n < 4):
-    print("N must be at least 4")
-    exit(1)
-
-board = create_board(int(n))
-row = 0
-safe_positions(board, row, int(n))
+print_board(place_next_queen(28, 28))
+console.log('\niterations: ', iterations)
